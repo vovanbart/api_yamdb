@@ -3,8 +3,8 @@ import csv
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from api_yamdb.reviews.models import (Category, Comment, Genre, GenreTitle, Review,
-                                      Title, User)
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
+                                      Title)
 
 TABLES_DICT = {
     User: 'users.csv',
