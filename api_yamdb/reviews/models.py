@@ -1,50 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
-
-
-ROLES = (
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор'),
-)
-
-
-class User(AbstractUser):
-    email = models.EmailField(
-        unique=True,
-        verbose_name='Почта',
-    )
-    role = models.CharField(
-        max_length=255,
-        choices=ROLES,
-        default='user',
-        verbose_name='Роль'
-    )
-    bio = models.TextField(
-        blank=True,
-        verbose_name='Био'
-    )
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-
-    def __str__(self) -> str:
-        return self.username
-
-    @property
-    def is_user(self):
-        return self.role == 'user'
-
-    @property
-    def is_admin(self):
-        return self.role == 'admin'
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
+from users.models import User
 
 
 class Title(models.Model):
@@ -139,7 +96,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        'User',
+        'users.User',
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Автор'
@@ -177,7 +134,7 @@ class Comment(models.Model):
     )
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
-        'User', on_delete=models.CASCADE,
+        'users.User', on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Автор'
     )

@@ -2,7 +2,8 @@ from django.db.models import Avg
 from django.utils import timezone
 from rest_framework import serializers
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):

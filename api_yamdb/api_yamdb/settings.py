@@ -21,9 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'api',
     'reviews',
-    'rest_framework',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -106,3 +107,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 ADMIN_EMAIL = 'Admin@admin.ru'
+
+AUTH_USER_MODEL = 'users.User'
