@@ -1,9 +1,13 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action, api_view, permission_classes
+from api_yamdb.settings import ADMIN_EMAIL
 
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title, User
 
 from .filters import TitleFilter
 from .permissions import (IsAuthorOrReadOnly,
@@ -15,7 +19,10 @@ from .serializers import (CategorySerializer,
                           GenreSerializer,
                           ReviewSerializer,
                           TitleCreateSerializer,
-                          TitleSerializer)
+                          TitleSerializer,
+                          UserSerializer,
+                          AdminUserSerializer,
+                          SignupSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -121,3 +128,73 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = CategorySerializer(category)
         category.delete()
         return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='me',
+        url_name='me',
+        permission_classes=(IsAuthenticated,)
+    )
+    def about(self, request):
+        serializer = UserSerializer(request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup(request):
+    """
+    Create user.
+    """
+    serializer = SignupSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        send_code(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def new_code(request):
+    """
+    Confirmation code.
+    """
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        username = serializer.data['username']
+        email = serializer.data['email']
+        user = get_object_or_404(User, username=username, email=email)
+        send_code(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def send_code(user):
+    """
+    Send code.
+    """
+    code = default_token_generator.make_token(user)
+    subject = 'Код'
+    message = f'{code} - ваш код'
+    admin_email = ADMIN_EMAIL
+    user_email = [user.email]
+    return send_mail(subject, message, admin_email, user_email)
