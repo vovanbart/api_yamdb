@@ -5,9 +5,14 @@ from .views import (CategoryViewSet,
                     CommentViewSet,
                     GenreViewSet,
                     ReviewViewSet,
-                    TitleViewSet)
+                    TitleViewSet,
+                    UserViewSet,
+                    signup)
 
 v1 = routers.DefaultRouter()
+v1.register('users',
+            UserViewSet,
+            basename='users')
 v1.register('titles',
             TitleViewSet,
             basename='titles')
@@ -28,4 +33,5 @@ v1.register(
 
 urlpatterns = [
     path('v1/', include(v1.urls)),
+    path('v1/auth/signup', signup, name='signup'),
 ]
