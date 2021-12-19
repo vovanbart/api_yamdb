@@ -7,7 +7,9 @@ from .views import (CategoryViewSet,
                     ReviewViewSet,
                     TitleViewSet,
                     UserViewSet,
-                    signup)
+                    signup,
+                    new_code,
+                    token)
 
 v1 = routers.DefaultRouter()
 v1.register('users',
@@ -33,5 +35,7 @@ v1.register(
 
 urlpatterns = [
     path('v1/', include(v1.urls)),
-    path('v1/auth/signup', signup, name='signup'),
+    path('v1/auth/signup/', signup, name='signup'),
+    path('v1/auth/code/', new_code, name='new_code'),
+    path('v1/auth/token/', token, name='token'),
 ]
