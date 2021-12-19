@@ -131,5 +131,3 @@ SIMPLE_JWT = {
 ADMIN_EMAIL = 'Admin@admin.ru'
 
 AUTH_USER_MODEL = 'users.User'
-
-
