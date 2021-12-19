@@ -139,6 +139,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    lookup_field = 'username'
+    lookup_value_regex = r'[\w\@\.\+\-]+'
 
     @action(
         detail=False,
