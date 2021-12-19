@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action, api_view, permission_classes
 from api_yamdb.settings import ADMIN_EMAIL
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
@@ -23,7 +24,8 @@ from .serializers import (CategorySerializer,
                           TitleSerializer,
                           UserSerializer,
                           AdminUserSerializer,
-                          SignupSerializer)
+                          SignupSerializer,
+                          TokenSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -137,6 +139,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    lookup_field = 'username'
+    lookup_value_regex = r'[\w\@\.\+\-]+'
 
     @action(
         detail=False,
@@ -199,3 +203,22 @@ def send_code(user):
     admin_email = ADMIN_EMAIL
     user_email = [user.email]
     return send_mail(subject, message, admin_email, user_email)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def token(request):
+    serializer = TokenSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    username = serializer.data['username']
+    user = get_object_or_404(User, username=username)
+    confirmation_code = serializer.data['confirmation_code']
+    if not default_token_generator.check_token(user, confirmation_code):
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    token = RefreshToken.for_user(user)
+    return Response(
+        {'token': str(token.access_token)}, status=status.HTTP_200_OK
+    )
