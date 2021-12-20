@@ -33,7 +33,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     Admin manage titles, other read
     """
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (IsAdmin | ReadOnly,)
     filterset_class = TitleFilter
 
@@ -184,13 +183,13 @@ def new_code(request):
     Confirmation code.
     """
     serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        username = serializer.data['username']
-        email = serializer.data['email']
-        user = get_object_or_404(User, username=username, email=email)
-        send_code(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    username = serializer.data['username']
+    email = serializer.data['email']
+    user = get_object_or_404(User, username=username, email=email)
+    send_code(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def send_code(user):
@@ -201,7 +200,7 @@ def send_code(user):
     subject = 'Код'
     message = f'{code} - ваш код'
     admin_email = ADMIN_EMAIL
-    user_email = [user.email]
+    user_email = (user.email,)
     return send_mail(subject, message, admin_email, user_email)
 
 
@@ -211,7 +210,6 @@ def token(request):
     serializer = TokenSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     username = serializer.data['username']
     user = get_object_or_404(User, username=username)
     confirmation_code = serializer.data['confirmation_code']
