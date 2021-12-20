@@ -33,7 +33,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     Admin manage titles, other read
     """
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (IsAdmin | ReadOnly,)
     filterset_class = TitleFilter
 
@@ -200,7 +199,7 @@ def send_code(user):
     subject = 'Код'
     message = f'{code} - ваш код'
     admin_email = ADMIN_EMAIL
-    user_email = [user.email]
+    user_email = (user.email,)
     return send_mail(subject, message, admin_email, user_email)
 
 
