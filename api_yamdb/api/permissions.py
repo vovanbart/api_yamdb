@@ -6,14 +6,14 @@ class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         return (
-            user.is_authenticated and user.is_admin
+            user.is_authenticated and user.ADMIN
             or user.is_superuser
         )
 
     def has_object_permission(self, request, view, obj):
         user = request.user
         return (
-            user.is_authenticated and user.is_admin
+            user.is_authenticated and user.ADMIN
             or user.is_superuser
         )
 
@@ -23,14 +23,14 @@ class IsModerator(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         return (
-            user.is_authenticated and user.is_moderator
+            user.is_authenticated and user.MODERATOR
             or user.is_staff
         )
 
     def has_object_permission(self, request, view, obj):
         user = request.user
         return (
-            user.is_authenticated and user.is_moderator
+            user.is_authenticated and user.MODERATOR
             or user.is_staff
         )
 
