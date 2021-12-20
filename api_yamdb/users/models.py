@@ -2,22 +2,24 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
-ROLES = (
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор'),
-)
-
-
 class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+
+    ROLE_CHOICES = (
+        (USER, 'Пользователь'),
+        (MODERATOR, 'Модератор'),
+        (ADMIN, 'Администратор')
+    )
     email = models.EmailField(
         unique=True,
         verbose_name='Почта',
     )
     role = models.CharField(
         max_length=255,
-        choices=ROLES,
-        default='user',
+        choices=ROLE_CHOICES,
+        default=USER,
         verbose_name='Роль'
     )
     bio = models.TextField(
@@ -31,15 +33,3 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
-
-    @property
-    def is_user(self):
-        return self.role == 'user'
-
-    @property
-    def is_admin(self):
-        return self.role == 'admin'
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
