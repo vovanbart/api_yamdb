@@ -184,6 +184,7 @@ def new_code(request):
     """
     serializer = UserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+    serializer.save()
     username = serializer.data['username']
     email = serializer.data['email']
     user = get_object_or_404(User, username=username, email=email)
