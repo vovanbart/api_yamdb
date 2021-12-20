@@ -170,11 +170,10 @@ def signup(request):
     Create user.
     """
     serializer = SignupSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        send_code(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+    send_code(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -184,13 +183,12 @@ def new_code(request):
     Confirmation code.
     """
     serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        username = serializer.data['username']
-        email = serializer.data['email']
-        user = get_object_or_404(User, username=username, email=email)
-        send_code(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.data['username']
+    email = serializer.data['email']
+    user = get_object_or_404(User, username=username, email=email)
+    send_code(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def send_code(user):
@@ -209,9 +207,7 @@ def send_code(user):
 @permission_classes([AllowAny])
 def token(request):
     serializer = TokenSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    serializer.is_valid(raise_exception=True)
     username = serializer.data['username']
     user = get_object_or_404(User, username=username)
     confirmation_code = serializer.data['confirmation_code']
