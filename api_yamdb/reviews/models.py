@@ -8,7 +8,7 @@ class Title(models.Model):
         max_length=200,
         verbose_name='Название')
     year = models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(timezone.now().year)],
+        validators=(MaxValueValidator(timezone.now().year),),
         verbose_name='Год'
     )
     description = models.CharField(
